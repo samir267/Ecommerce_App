@@ -1,0 +1,48 @@
+name: ecom
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"  # Assurez-vous d'avoir une compatibilité avec Flutter 3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fluttertoast: ^8.0.9
+
+
+
+  # Animation Lottie
+  lottie: ^3.1.2
+
+  # Dépendances additionnelles pour la gestion d'état et API
+  dio: ^5.1.0             # Pour les appels API
+  shared_preferences: ^2.1.0  # Pour la gestion de la persistance locale (tokens, etc.)
+  json_annotation: ^4.8.1  # Pour la sérialisation JSON des modèles
+  logger: ^1.1.0           # Pour l'écriture des logs
+
+  # Gestion des tokens JWT (si nécessaire)
+  jwt_decoder: ^2.0.1  # Pour décoder les tokens JWT
+
+  # UI et composants supplémentaires
+  flutter_secure_storage: ^6.0.1  # Pour stocker des données sensibles comme les tokens
+  flutter_svg: ^2.0.10+1
+  carousel_slider: ^5.0.0
+  line_awesome_flutter: ^3.0.1
+  http: ^1.2.2
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  build_runner: ^2.3.3  # Pour générer le code de sérialisation JSON
+  json_serializable: ^6.6.1  # Pour la sérialisation JSON automatique
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/welcome.json  # Assurez-vous que le fichier welcome.json est bien présent dans le dossier assets
+    - assets/google.png
+    - assets/

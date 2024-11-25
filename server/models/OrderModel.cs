@@ -1,49 +1,52 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using server.models;
+using Microsoft.EntityFrameworkCore;
 
 namespace server.Models
 {
-    public class OrderModel
-    {
-        [Key]
-        public int OrderId { get; set; }
+	public class OrderModel
+	{
+		[Key]
+		public int OrderId { get; set; }
 
-        [Required]
-        public int UserId { get; set; }  // Foreign key to User
+		[Required]
+		public int UserId { get; set; }  // Foreign key to User
 
-        [Required]
-        public DateTime OrderDate { get; set; }
+		[Required]
+		public DateTime OrderDate { get; set; }
 
-        [Required]
-        public decimal TotalAmount { get; set; }
+		[Required]
+		[Precision(18, 2)] // Total 18 digits, with 2 after the decimal point
+		public decimal TotalAmount { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        public string OrderStatus { get; set; }
+		[Required]
+		[MaxLength(50)]
+		public string OrderStatus { get; set; }
 
-        [MaxLength(50)]
-        public string PaymentStatus { get; set; }
+		[MaxLength(50)]
+		public string PaymentStatus { get; set; }
 
-        [MaxLength(500)]
-        public string ShippingAddress { get; set; }
+		[MaxLength(500)]
+		public string ShippingAddress { get; set; }
 
-        [MaxLength(50)]
-        public string PaymentMethod { get; set; }
+		[MaxLength(50)]
+		public string PaymentMethod { get; set; }
 
-        public decimal? Discount { get; set; }
+		[Precision(18, 2)] // Optional field with precision
+		public decimal? Discount { get; set; }
 
-        [Column(TypeName = "datetime")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+		[Column(TypeName = "datetime")]
+		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [Column(TypeName = "datetime")]
-        public DateTime? UpdatedAt { get; set; }
+		[Column(TypeName = "datetime")]
+		public DateTime? UpdatedAt { get; set; }
 
-        // Navigation property for User
-        [ForeignKey("UserId")]
-        public virtual UserModel User { get; set; }
+		// Navigation property for User
+		[ForeignKey("UserId")]
+		public virtual UserModel User { get; set; }
 
-        // Navigation property for OrderProduct (linking products with the order)
-        public virtual ICollection<OrderProductModel> OrderProducts { get; set; }
-    }
+		// Navigation property for OrderProduct (linking products with the order)
+		public virtual ICollection<OrderProductModel> OrderProducts { get; set; }
+	}
 }

@@ -1,0 +1,48 @@
+[
+    {
+      "id": 1,
+      "productName": "Laptop",
+      "category": "Electronics",
+      "price": 1200,
+      "quantity": 10,
+      "description": "High-performance laptop with 16GB RAM and 512GB SSD.",
+      "imagePath": "/images/laptop.jpeg"
+    },
+    {
+      "id": 2,
+      "productName": "Wireless Headphones",
+      "category": "Accessories",
+      "price": 150,
+      "quantity": 30,
+      "description": "Noise-canceling over-ear headphones with 20-hour battery life.",
+      "imagePath": "images/headphones.jpg"
+    },
+    {
+      "id": 3,
+      "productName": "Smartphone",
+      "category": "Electronics",
+      "price": 800,
+      "quantity": 20,
+      "description": "5G smartphone with OLED display and 128GB storage.",
+      "imagePath": "images/smartphone.jpg"
+    },
+    {
+      "id": 4,
+      "productName": "Coffee Maker",
+      "category": "Appliances",
+      "price": 85,
+      "quantity": 15,
+      "description": "Compact coffee maker with programmable timer.",
+      "imagePath": "images/coffee_maker.jpg"
+    },
+    {
+      "id": 5,
+      "productName": "Gaming Mouse",
+      "category": "Accessories",
+      "price": 50,
+      "quantity": 50,
+      "description": "Ergonomic mouse with customizable DPI and RGB lighting.",
+      "imagePath": "images/gaming_mouse.jpg"
+    }
+  ]
+  

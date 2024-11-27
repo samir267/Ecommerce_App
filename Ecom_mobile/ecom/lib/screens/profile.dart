@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ecom/sqlite/UserDatabase.dart'; // Importez votre classe de base de données
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -61,7 +62,9 @@ backgroundColor: Colors.blue.shade700, // Remplacer la couleur
                       icon: Icons.exit_to_app,
                       title: "Log out ",
                       onTap: () {
-                        // Code pour déconnexion
+                        UserDatabase().deleteUser();
+                        Navigator.pushNamed(context, "/login");
+
                       },
                     ),
                      ProfileMenuListTile(

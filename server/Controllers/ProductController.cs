@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using server.Dto;
 using server.Models;
 using server.Services;
+using Microsoft.EntityFrameworkCore;
 
 
 
@@ -97,6 +98,32 @@ public class ProductController : ControllerBase
         }
         return Ok(product);
     }
+
+
+
+    [HttpGet("category/{categoryId}")]
+    public async Task<List<ProductModel>> GetProductsByCategoryIdAsync(int categoryId)
+    {
+        var products = await _productService.GetAllProductsAsync();
+
+        return products
+            .Where(product => product.CategoryId == categoryId) 
+            .Select(product => new ProductModel 
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Quantity = product.Quantity,
+                Image = product.Image,
+                Price = product.Price,
+                CategoryId=product.CategoryId,
+                UserId=product.UserId
+
+            })
+            .ToList();
+    }
+
+
 
     // READ : Récupérer tous les produits
     [HttpGet]

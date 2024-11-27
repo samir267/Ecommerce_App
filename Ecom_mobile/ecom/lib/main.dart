@@ -2,8 +2,11 @@ import 'dart:async';
 import 'package:ecom/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+
+void main() async{
+  await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
@@ -40,6 +43,8 @@ class _Splash3State extends State<Splash3> {
   }
 
   @override
+
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(

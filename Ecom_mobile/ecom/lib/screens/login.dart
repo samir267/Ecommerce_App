@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ecom/routes/app_routes.dart';
 import 'package:ecom/services/auth_service.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ecom/sqlite/UserDatabase.dart'; // Importez votre classe de base de données
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -13,6 +15,7 @@ class LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
+  final UserDatabase _userDatabase = UserDatabase(); // Instance de la classe UserDatabase
 
   bool _isLoading = false;
 
@@ -34,18 +37,25 @@ class LoginPageState extends State<LoginPage> {
 
     try {
       print('Starting login process for email: $email');
-      await _authService.login(email, password);
+      final response = await _authService.login(email, password);
+      final responseBody = response; // Votre réponse du backend
+      final userId = responseBody['userId'];
+      final accessToken = responseBody['accessToken'];
+
+      // Sauvegarder les informations dans la base de données SQLite
+      await _userDatabase.deleteUser();
+      await _userDatabase.insertUser(userId, accessToken);
 
       if (mounted) {
         Fluttertoast.showToast(
-        msg: "Login successful",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 3,
-        backgroundColor: const Color.fromARGB(255, 182, 123, 123),
-        textColor: Colors.white,
-        fontSize: 16.0
-    );
+          msg: "Login successful",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 3,
+          backgroundColor: const Color.fromARGB(255, 182, 123, 123),
+          textColor: Colors.white,
+          fontSize: 16.0
+        );
         print('Login successful. Redirecting to home...');
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
@@ -87,6 +97,7 @@ class LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
 
   Widget _header() {
     return const Column(

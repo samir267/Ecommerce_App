@@ -3,10 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/io_client.dart';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class AuthService {
-  final String baseUrl = "https://192.168.1.36:7223/api/User";
-  final String baseUrl2 = "https://192.168.1.36:7223/api/Login";
+  final String baseUrl = "${dotenv.env['BASE_URL']!}:7223/api/User";
+  final String baseUrl2 = "${dotenv.env['BASE_URL']!}:7223/api/Login";
+
   final FlutterSecureStorage storage = FlutterSecureStorage();
 
   final HttpClient client = HttpClient()
@@ -35,41 +38,45 @@ class AuthService {
   }
 
   // Connexion
-  Future<void> login(String email, String password) async {
-    final url = Uri.parse('$baseUrl2/PostLoginDetails');
+ Future<Map<String, dynamic>> login(String email, String password) async {
+  final url = Uri.parse('$baseUrl2/PostLoginDetails');
 
-    try {
-      print('Starting login process for email: $email');
-      print('Attempting login to URL: $url');
+  try {
+    print('Starting login process for email: $email');
+    print('Attempting login to URL: $url');
 
-      final response = await ioClient.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      );
+    final response = await ioClient.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
 
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
+    print('Response status code: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
 
-        // Vérifiez si le champ "accessToken" existe
-        if (data.containsKey('accessToken')) {
-          final token = data['accessToken'];
-          await storage.write(key: 'jwt', value: token); // Sauvegarde du token
-          print('Login successful. Token saved: $token');
-        } else {
-          throw Exception('Token not found in response.');
-        }
-      } else if (response.statusCode == 401) {
-        throw Exception('Invalid credentials. Please check your email and password.');
+      // Vérifiez si le champ "accessToken" existe
+      if (data.containsKey('accessToken')) {
+        final token = data['accessToken'];
+        await storage.write(key: 'jwt', value: token); // Sauvegarde du token
+        print('Login successful. Token saved: $token');
+        
+        // Return the data that contains user info and token
+        return data;  // Returns a Map with user data, including the accessToken
       } else {
-        throw Exception('Failed to log in. Error: ${response.statusCode}');
+        throw Exception('Token not found in response.');
       }
-    } catch (e) {
-      print('Error during login request: $e');
-      throw Exception('An error occurred: $e');
+    } else if (response.statusCode == 401) {
+      throw Exception('Invalid credentials. Please check your email and password.');
+    } else {
+      throw Exception('Failed to log in. Error: ${response.statusCode}');
     }
+  } catch (e) {
+    print('Error during login request: $e');
+    throw Exception('An error occurred: $e');
   }
+}
+
 }

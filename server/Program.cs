@@ -42,7 +42,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowSpecificOrigins", policy =>
     {
         // Retirer la barre oblique à la fin de l'URL
-        policy.WithOrigins("http://localhost:65357")  // URL de votre front-end Flutter
+        policy.WithOrigins()  // URL de votre front-end Flutter
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();  // Si vous utilisez des cookies ou des sessions

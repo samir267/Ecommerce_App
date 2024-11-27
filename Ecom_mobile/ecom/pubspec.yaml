@@ -10,6 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   fluttertoast: ^8.0.9
+  flutter_dotenv: ^5.0.2
+  sqflite: ^2.0.0+4
+
 
 
 
@@ -46,3 +49,4 @@ flutter:
     - assets/welcome.json  # Assurez-vous que le fichier welcome.json est bien présent dans le dossier assets
     - assets/google.png
     - assets/
+    - .env

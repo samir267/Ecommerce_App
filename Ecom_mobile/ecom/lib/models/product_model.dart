@@ -31,4 +31,8 @@ class Product {
       userId: json['userId'],
     );
   }
+  
+  String toString() {
+    return 'Product(id: $id, name: $name, description: $description, price: $price, image: $image)';
+  }
 }

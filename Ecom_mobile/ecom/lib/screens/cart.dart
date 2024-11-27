@@ -1,38 +1,127 @@
+import 'dart:convert';
+import 'package:ecom/services/product_service.dart'; // Importez le service
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:ecom/models/productCart.dart'; // Importez votre modèle de produit
+import 'package:ecom/sqlite/UserDatabase.dart';
 
-class CartPage extends StatelessWidget {
-  final List<Map<String, dynamic>> cartItems = [
-    {
-      'image': 'https://images.pexels.com/photos/90946/pexels-photo-90946.jpeg?cs=srgb&dl=pexels-madebymath-90946.jpg&fm=jpg',
-      'name': 'Nikon',
-      'price': 20.0,
-      'quantity': 1,
-    },
-    {
-      'image': 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D',
-      'name': 'Airpod',
-      'price': 30.0,
-      'quantity': 2,
-    },
-    {
-      'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3hf_7Cw2cK7ZAup3kJGHWuhmCZbH8VfjDu783-s-y2JWAD5_7F4AueFJrIA9zg8UEOpc&usqp=CAU',
-      'name': 'Iphone 14',
-      'price': 30.0,
-      'quantity': 2,
-    },
-  ];
+
+class CartPage extends StatefulWidget {
+
+  const CartPage({Key? key}) : super(key: key);
+
+  @override
+  _CartPageState createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  bool isLoading = true;
+  bool isError = false;
+  late List<ProductCart> cartItems = []; // Liste des produits dans le panier
+  Map<int, int> quantities = {}; // Associe l'ID d'un produit à sa quantité
+
+  final ProductService _productService = ProductService();
+  
+  String? userId;  // Ajoutez la variable pour stocker l'ID de l'utilisateur
+  String? accessToken; // Ajoutez la variable pour stocker le token d'accès
+
+  @override
+  void initState() {
+    super.initState();
+    _getUser();  // Récupérer les données utilisateur dès le démarrage de la page
+  }
+
+  // Récupérer les données de l'utilisateur
+  Future<void> _getUser() async {
+    try {
+      final userDatabase = UserDatabase();
+      final user = await userDatabase.getUser();
+      if (user != null) {
+        setState(() {
+          print("dans home screen ${user['userId']}");
+          userId = user['userId'].toString();
+          accessToken = user['accessToken'];
+        });
+        fetchCartByUserId();  // Récupérer le panier après avoir obtenu l'ID de l'utilisateur
+      } else {
+        setState(() {
+          userId = null;
+          accessToken = null;
+        });
+      }
+    } catch (e) {
+      print('Error retrieving user data: $e');
+      setState(() {
+        userId = null;
+        accessToken = null;
+      });
+    }
+  }
+
+  // Utilisez la méthode fetchCartByUserId du service
+  Future<void> fetchCartByUserId() async {
+    if (userId == null) return; // Assurez-vous que l'ID de l'utilisateur est valide
+
+    try {
+      final response = await _productService.fetchCartByUserId(int.parse(userId!)); // Utilisez userId ici
+
+      if (response != null && response['cartItems'] != null) {
+        List<dynamic>? values = response['cartItems']['\$values'];
+        if (values != null) {
+          setState(() {
+            cartItems = values
+                .map((item) =>
+                    item['product'] != null ? ProductCart.fromJson(item['product']) : null)
+                .whereType<ProductCart>()
+                .toList();
+
+            // Initialiser les quantités à 1 pour chaque produit
+            for (var product in cartItems) {
+              quantities[product.id] = 1;
+            }
+          });
+          print("Fetched cart products: $cartItems");
+          print("Initialized quantities: $quantities");
+        } else {
+          print("No cart items found in response.");
+        }
+      } else {
+        print("Response is null or does not contain 'cartItems'.");
+      }
+    } catch (error) {
+      print("Erreur lors de la récupération du panier: $error");
+      setState(() {
+        isError = true;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  // Votre méthode de calcul du prix total reste inchangée
+  double calculateTotalPrice() {
+    return cartItems.fold(
+      0.0,
+      (total, item) => total + (item.price * (quantities[item.id] ?? 1)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _productService.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    double totalPrice = cartItems.fold(
-      0,
-      (sum, item) => sum + (item['price'] * item['quantity']),
-    );
+    double totalPrice = calculateTotalPrice();
 
     return Scaffold(
       appBar: AppBar(
         elevation: 5,
-        backgroundColor: Colors.blue.shade700, // Change de violet à bleu
+        backgroundColor: Colors.blue.shade700,
         title: Text(
           "My Cart",
           style: TextStyle(
@@ -45,84 +134,17 @@ class CartPage extends StatelessWidget {
       ),
       body: Column(
         children: [
+          // Affichage de la liste des produits dans le panier
           Expanded(
             child: ListView.builder(
-              itemCount: cartItems.length,
+              itemCount: cartItems.length + (isLoading ? 1 : 0), // +1 pour ajouter l'indicateur de chargement
               itemBuilder: (context, index) {
+                if (isLoading && index == cartItems.length) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
                 final item = cartItems[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Card(
-                    elevation: 8,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    shadowColor: Colors.blue.shade100, // Change la couleur de l'ombre
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.network(
-                            item['image'],
-                            height: 120,
-                            width: 120,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        SizedBox(width: 15),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item['name'],
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade900, // Change la couleur du texte
-                                  ),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  "€${item['price']}",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.blue.shade600, // Change la couleur du prix
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                SizedBox(height: 12),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.remove_circle, color: Colors.red),
-                                      onPressed: () {
-                                        // Handle quantity decrease
-                                      },
-                                    ),
-                                    Text(
-                                      item['quantity'].toString(),
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.add_circle, color: Colors.green),
-                                      onPressed: () {
-                                        // Handle quantity increase
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
+                return _buildCartItem(item); // Afficher chaque produit du panier
               },
             ),
           ),
@@ -133,7 +155,7 @@ class CartPage extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              shadowColor: Colors.blue.shade200, // Change la couleur de l'ombre
+              shadowColor: Colors.blue.shade200,
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -183,11 +205,11 @@ class CartPage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "€${(totalPrice + 5).toStringAsFixed(2)}",
+                          "€${calculateTotalPrice().toStringAsFixed(2)}",
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade700, // Change la couleur du total
+                            color: Colors.blue.shade700,
                           ),
                         ),
                       ],
@@ -197,39 +219,97 @@ class CartPage extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue.shade700, Colors.blue.shade400], // Change de violet à bleu
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(30),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCartItem(ProductCart item) {
+    int quantity = quantities[item.id] ?? 1; // Obtenir la quantité depuis l'état
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Card(
+        elevation: 8,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        shadowColor: Colors.blue.shade100,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Image.network(
+                item.image,
+                height: 120,
+                width: 120,
+                fit: BoxFit.cover,
               ),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle checkout
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    "Proceed to Checkout",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
+            ),
+            SizedBox(width: 15),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade900,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "€${item.price}",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue.shade700,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              // Si la clé n'existe pas, initialiser à 1 avant d'incrémenter
+                              quantities[item.id] = (quantities[item.id] ?? 1) + 1;
+                            });
+                          },
+                          icon: Icon(Icons.add, color: Colors.blue.shade700),
+                        ),
+                        Text(
+                          "${quantities[item.id]}",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              // Si la quantité est plus que 1, décrémenter
+                              if ((quantities[item.id] ?? 1) > 1) {
+                                quantities[item.id] = (quantities[item.id] ?? 1) - 1;
+                              }
+                            });
+                          },
+                          icon: Icon(Icons.remove, color: Colors.blue.shade700),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

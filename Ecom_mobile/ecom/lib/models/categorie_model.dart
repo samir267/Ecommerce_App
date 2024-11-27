@@ -2,6 +2,7 @@ class Category {
   final int id;
   final String name;
 
+  // Constructeur
   Category({required this.id, required this.name});
 
   // Factory constructor pour créer une instance de Category depuis un JSON

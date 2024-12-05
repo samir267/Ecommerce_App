@@ -4,7 +4,7 @@
 
 namespace server.Migrations
 {
-    public partial class products : Migration
+    public partial class AddCommentTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

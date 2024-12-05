@@ -16,20 +16,20 @@ backgroundColor: Colors.blue.shade700, // Remplacer la couleur
       body: Column(
         children: [
           // Image de profil et nom de l'utilisateur
-          const SizedBox(height: 30),
-          CircleAvatar(
-            radius: 50,
-            backgroundImage: NetworkImage("https://i.imgur.com/IXnwbLk.png"),
-          ),
-          const SizedBox(height: 15),
-          const Text(
-            "Sepide", 
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const Text(
-            "theflutterway@gmail.com",
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-          ),
+          // const SizedBox(height: 30),
+          // CircleAvatar(
+          //   radius: 50,
+          //   backgroundImage: NetworkImage("https://w7.pngwing.com/pngs/306/70/png-transparent-computer-icons-management-admin-silhouette-black-and-white-neck-thumbnail.png"),
+          // ),
+          // const SizedBox(height: 15),
+          // const Text(
+          //   "Sepide", 
+          //   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          // ),
+          // const Text(
+          //   "theflutterway@gmail.com",
+          //   style: TextStyle(fontSize: 16, color: Colors.grey),
+          // ),
           const SizedBox(height: 30),
 
           // Carte d'informations de l'utilisateur
@@ -53,9 +53,9 @@ backgroundColor: Colors.blue.shade700, // Remplacer la couleur
                     ),
                     ProfileMenuListTile(
                       icon: Icons.help_outline,
-                      title: "Help",
+                      title: "historicOrders",
                       onTap: () {
-                        Navigator.pushNamed(context, "/help");
+                        Navigator.pushNamed(context, "/historicOrders");
                       },
                     ),
                     ProfileMenuListTile(
@@ -67,13 +67,13 @@ backgroundColor: Colors.blue.shade700, // Remplacer la couleur
 
                       },
                     ),
-                     ProfileMenuListTile(
-                      icon: Icons.lock_reset,
-                      title: "Reset Password ",
-                      onTap: () {
-                        // Code pour déconnexion
-                      },
-                    ),
+                    //  ProfileMenuListTile(
+                    //   icon: Icons.lock_reset,
+                    //   title: "Reset Password ",
+                    //   onTap: () {
+                    //     // Code pour déconnexion
+                    //   },
+                    // ),
                   ],
                 ),
               ),

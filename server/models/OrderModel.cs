@@ -33,6 +33,8 @@ namespace server.Models
 
         public decimal? Discount { get; set; }
 
+        public double subtotal { get; set; }
+
         [Column(TypeName = "datetime")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

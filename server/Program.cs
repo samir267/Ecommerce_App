@@ -35,6 +35,8 @@ builder.Services.AddScoped<ICartRepositry, CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<CommentRepository>(); 
+builder.Services.AddScoped<CommentService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>
@@ -100,6 +102,8 @@ var mapperConfig = new MapperConfiguration(mc =>
 });
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
+
+
 
 // Build the application
 var app = builder.Build();

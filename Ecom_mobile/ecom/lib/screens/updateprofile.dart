@@ -16,6 +16,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   String? address;
   String? email;
   String? phoneNumber;
+  String? profileImage;
 
   // Contrôleurs de texte
   final TextEditingController firstNameController = TextEditingController();
@@ -48,6 +49,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         address = userData['address'];
         email = userData['email'];
         phoneNumber = userData['phone'];
+        profileImage = userData['profileImage']; // Remplir l'image de profil
+
 
         // Initialiser les contrôleurs avec les données récupérées
         firstNameController.text = firstName ?? '';
@@ -82,12 +85,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       };
       print("userData $userData");
       // Mettez à jour les informations utilisateur
-      await userService.updateUser(5, userData);
-
-      // Afficher un message de succès
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully!")),
       );
+await userService.updateUser(int.parse(userId!), userData);
+      // Afficher un message de succès
     } catch (e) {
       // Gérer les erreurs
       // ScaffoldMessenger.of(context).showSnackBar(
@@ -117,7 +119,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 50,
-                      backgroundImage: const NetworkImage("https://i.imgur.com/IXnwbLk.png"),
+                      backgroundImage: const NetworkImage("https://w7.pngwing.com/pngs/306/70/png-transparent-computer-icons-management-admin-silhouette-black-and-white-neck-thumbnail.png"),
                     ),
                     Positioned(
                       bottom: 0,

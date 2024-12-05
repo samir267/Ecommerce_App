@@ -1,4 +1,5 @@
-﻿using server.models;
+﻿using iText.StyledXmlParser.Jsoup.Nodes;
+using server.models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -33,6 +34,8 @@ namespace server.Models
         // Foreign key to User
         [ForeignKey("User")]
         public int UserId { get; set; }
+
+        public virtual ICollection<CommentModel> Comments { get; set; } = new List<CommentModel>(); 
 
     }
 }

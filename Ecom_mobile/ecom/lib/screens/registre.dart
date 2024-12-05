@@ -32,6 +32,7 @@ class _SignupPageState extends State<SignupPage> {
         "password": _passwordController.text.trim(),
         "address": _addressController.text.trim(),
         "phone": _phoneController.text.trim(),
+        "status": "active"
       };
 
       final response = await _authService.register(userData);

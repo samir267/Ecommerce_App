@@ -1,13 +1,13 @@
 import 'dart:convert';
+import 'package:ecom/services/order_service.dart';
 import 'package:ecom/services/product_service.dart'; // Importez le service
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:ecom/models/productCart.dart'; // Importez votre modèle de produit
 import 'package:ecom/sqlite/UserDatabase.dart';
-
+import 'package:fluttertoast/fluttertoast.dart';
 
 class CartPage extends StatefulWidget {
-
   const CartPage({Key? key}) : super(key: key);
 
   @override
@@ -21,7 +21,7 @@ class _CartPageState extends State<CartPage> {
   Map<int, int> quantities = {}; // Associe l'ID d'un produit à sa quantité
 
   final ProductService _productService = ProductService();
-  
+  final OrderService _orderService = OrderService();
   String? userId;  // Ajoutez la variable pour stocker l'ID de l'utilisateur
   String? accessToken; // Ajoutez la variable pour stocker le token d'accès
 
@@ -38,7 +38,6 @@ class _CartPageState extends State<CartPage> {
       final user = await userDatabase.getUser();
       if (user != null) {
         setState(() {
-          print("dans home screen ${user['userId']}");
           userId = user['userId'].toString();
           accessToken = user['accessToken'];
         });
@@ -214,6 +213,20 @@ class _CartPageState extends State<CartPage> {
                         ),
                       ],
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // Centre le bouton horizontalement
+                      children: [
+                        TextButton(
+                          style: ButtonStyle(
+                            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+                          ),
+                          onPressed: () {
+                            _showOrderModal(context); // Affiche le modal
+                          },
+                          child: Text('Order Now'),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -224,89 +237,177 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  Widget _buildCartItem(ProductCart item) {
-    int quantity = quantities[item.id] ?? 1; // Obtenir la quantité depuis l'état
+  void _showOrderModal(BuildContext context) {
+    String shippingAddress = ""; // Valeur initiale pour l'adresse
+    String paymentMethod = ""; // Valeur initiale pour la méthode de paiement
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Card(
-        elevation: 8,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        shadowColor: Colors.blue.shade100,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Image.network(
-                item.image,
-                height: 120,
-                width: 120,
-                fit: BoxFit.cover,
-              ),
-            ),
-            SizedBox(width: 15),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.name,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade900,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      "€${item.price}",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.blue.shade700,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              // Si la clé n'existe pas, initialiser à 1 avant d'incrémenter
-                              quantities[item.id] = (quantities[item.id] ?? 1) + 1;
-                            });
-                          },
-                          icon: Icon(Icons.add, color: Colors.blue.shade700),
-                        ),
-                        Text(
-                          "${quantities[item.id]}",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              // Si la quantité est plus que 1, décrémenter
-                              if ((quantities[item.id] ?? 1) > 1) {
-                                quantities[item.id] = (quantities[item.id] ?? 1) - 1;
-                              }
-                            });
-                          },
-                          icon: Icon(Icons.remove, color: Colors.blue.shade700),
-                        ),
-                      ],
-                    ),
-                  ],
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            "Complete Your Order",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Champ pour l'adresse de livraison
+              TextField(
+                onChanged: (value) {
+                  shippingAddress = value;
+                },
+                decoration: InputDecoration(
+                  labelText: "Shipping Address",
+                  hintText: "Enter your shipping address",
+                  border: OutlineInputBorder(),
                 ),
               ),
+              SizedBox(height: 20),
+              // Dropdown pour la méthode de paiement
+              DropdownButtonFormField<String>(
+                value: paymentMethod.isEmpty ? null : paymentMethod,
+                onChanged: (value) {
+                  if (value != null) {
+                    paymentMethod = value;
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: "Payment Method",
+                  border: OutlineInputBorder(),
+                ),
+                items: ["En ligne", "A la livraison"]
+                    .map((method) => DropdownMenuItem(
+                          value: method,
+                          child: Text(method),
+                        ))
+                    .toList(),
+              ),
+            ],
+          ),
+          actions: [
+            // Bouton pour annuler
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Fermer le modal
+              },
+              child: Text("Cancel"),
+            ),
+            // Bouton pour confirmer
+            ElevatedButton(
+              onPressed: () {
+                if (shippingAddress.isEmpty || paymentMethod.isEmpty) {
+                  // Si l'un des champs est vide, retournez
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Please fill all fields')),
+                  );
+                  return;
+                }
+                createOrder(shippingAddress, paymentMethod);
+                Navigator.of(context).pop();
+              },
+              child: Text("Confirm Order"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Fonction pour créer la commande
+ Future<void> createOrder(String shippingAddress, String paymentMethod) async {
+  if (userId == null) {
+    print('User is not authenticated');
+    return;
+  }
+
+  // Création des données de la commande
+  final orderData = {
+    'userId': userId,  // Assurez-vous que userId est un String valide
+    'shippingAddress': shippingAddress,
+    'paymentMethod': paymentMethod,
+    // 'totalPrice': calculateTotalPrice(), // Assurez-vous que cette fonction est définie si nécessaire
+  };
+
+  try {
+    // Cast explicite pour s'assurer que les valeurs sont des String
+    final String userIdString = orderData['userId'] as String; 
+    final String shippingAddressString = orderData['shippingAddress'] as String;
+    final String paymentMethodString = orderData['paymentMethod'] as String;
+print("Order data: ${jsonEncode({
+  'userId': userIdString,
+  'shippingAddress': shippingAddressString,
+  'paymentMethod': paymentMethodString,
+  'subtotal': double.parse(calculateTotalPrice().toStringAsFixed(2)),
+})}");
+
+    // Crée une instance du service OrderService
+    final orderService = OrderService();
+
+    // Appel de la méthode createOrder avec des String valides
+    await orderService.createOrder(
+      userId: userIdString,
+      address: shippingAddressString,
+      paymentMethod: paymentMethodString,
+      subtotal: double.parse(calculateTotalPrice().toStringAsFixed(2)),
+    );
+     Fluttertoast.showToast(
+          msg: "Order created successfully",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 3,
+          backgroundColor: const Color.fromARGB(255, 182, 123, 123),
+          textColor: Colors.white,
+          fontSize: 16.0
+        );
+    
+    print("Order created successfully.");
+    print("userId $userIdString");
+        orderService.deleteUserCart(int.parse(userId!));
+
+  } catch (e) {
+    print("Failed to create order: $e");
+  }
+}
+
+
+  // Construire chaque élément du panier
+  Widget _buildCartItem(ProductCart item) {
+    return Card(
+      elevation: 4,
+      margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: ListTile(
+        contentPadding: EdgeInsets.all(16),
+        leading: Image.network(item.image),
+        title: Text(item.name),
+        subtitle: Text("€${item.price}"),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: Icon(Icons.remove),
+              onPressed: () {
+                setState(() {
+                  if (quantities[item.id]! > 1) {
+                    quantities[item.id] = quantities[item.id]! - 1;
+                  }
+                });
+              },
+            ),
+            Text(quantities[item.id].toString()),
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                setState(() {
+                  quantities[item.id] = quantities[item.id]! + 1;
+                });
+              },
             ),
           ],
         ),

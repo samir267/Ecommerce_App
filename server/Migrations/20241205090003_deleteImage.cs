@@ -4,23 +4,23 @@
 
 namespace server.Migrations
 {
-    public partial class OrderPr : Migration
+    public partial class deleteImage : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "TaxAmount",
-                table: "Order");
+                name: "ProfileImage",
+                table: "Users");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
-                name: "TaxAmount",
-                table: "Order",
-                type: "decimal(18,2)",
+            migrationBuilder.AddColumn<string>(
+                name: "ProfileImage",
+                table: "Users",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0m);
+                defaultValue: "");
         }
     }
 }

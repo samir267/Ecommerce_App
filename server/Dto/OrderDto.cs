@@ -10,12 +10,15 @@
             public int UserId { get; set; }
             public string ShippingAddress { get; set; }
             public string PaymentMethod { get; set; }
+
+            public double subtotal { get; set; }
         }
 
         public class OrderItemDto
         {
             public int ProductId { get; set; }
             public int Quantity { get; set; }
+
         }
     }
 

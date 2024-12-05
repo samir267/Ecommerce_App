@@ -16,6 +16,7 @@ dependencies:
 
 
 
+
   # Animation Lottie
   lottie: ^3.1.2
 
@@ -34,6 +35,8 @@ dependencies:
   carousel_slider: ^5.0.0
   line_awesome_flutter: ^3.0.1
   http: ^1.2.2
+  image_picker: ^1.1.2
+  
 
 
 dev_dependencies:
@@ -50,3 +53,4 @@ flutter:
     - assets/google.png
     - assets/
     - .env
+    - assets/images.jpg

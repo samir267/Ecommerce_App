@@ -305,7 +305,16 @@ Widget build(BuildContext context) {
                         itemCount: _products.length,
                         itemBuilder: (context, index) {
                           final product = _products[index];
-                          return Card(
+                          return GestureDetector(
+                                        onTap: () {
+                                          // Lorsque vous cliquez sur le produit, naviguez vers la page de détails
+                                          Navigator.pushNamed(
+                                            context,
+                                            AppRoutes.productDetails,
+                                            arguments: product.id, // Passez l'ID du produit
+                                          );
+                                        },
+                          child: Card(
                             elevation: 2,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -398,7 +407,9 @@ Widget build(BuildContext context) {
                                 ),
                               ],
                             ),
+                          ),
                           );
+
                         },
                       ),
                     ),

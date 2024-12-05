@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 using server.Models;
 using server.Services;
 using server.Dto; // Assurez-vous d'importer le namespace de votre DTO
+using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using dotenv.net;
 
 namespace server.Controllers
 {
@@ -11,10 +14,20 @@ namespace server.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserService _userService;
+        private readonly Cloudinary _cloudinary;
 
         public UserController(UserService userService)
         {
             _userService = userService;
+            DotEnv.Load();
+
+            var cloudinaryUrl = Environment.GetEnvironmentVariable("CLOUDINARY_URL");
+            if (cloudinaryUrl == null)
+            {
+                throw new InvalidOperationException("CLOUDINARY_URL is not set in environment variables.");
+            }
+
+            _cloudinary = new Cloudinary(cloudinaryUrl);
         }
 
         // CREATE: Créer un nouvel utilisateur
@@ -30,6 +43,9 @@ namespace server.Controllers
 
             return Ok(createdUser);
         }
+
+
+
 
         // READ: Obtenir un utilisateur par ID
         [HttpGet("{id}")]

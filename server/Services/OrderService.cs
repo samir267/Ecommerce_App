@@ -36,6 +36,7 @@ namespace server.Services
                 UserId = orderDto.UserId,
                 ShippingAddress = orderDto.ShippingAddress,
                 PaymentMethod = orderDto.PaymentMethod,
+                subtotal=orderDto.subtotal,
                 OrderDate = DateTime.Now,
                 OrderStatus = "Pending", // Default status
                 PaymentStatus = "Unpaid", // Default status

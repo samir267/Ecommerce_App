@@ -16,6 +16,7 @@ namespace server.Models
         public DbSet<CartModel> Cart { get; set; }
         public DbSet<OrderProductModel> OrderProduct { get; set; }
         public DbSet<OrderModel> Order { get; set; }
+        public DbSet<CommentModel> Comment { get; set; }
 
     }
 }

@@ -1,6 +1,10 @@
-﻿using System;
+﻿using iText.StyledXmlParser.Jsoup.Nodes;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
+using System.Collections.ObjectModel;
+using server.models;
 
 namespace server.Models
 {
@@ -38,10 +42,16 @@ namespace server.Models
 
         public string? RefreshToken { get; set; }
 
+        //public string ProfileImage { get; set; }
+
         [Column(TypeName = "datetime")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [Column(TypeName = "datetime")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public Collection<CommentModel> Comments { get; set; } = new Collection<CommentModel>(); 
+
+      
     }
 }
